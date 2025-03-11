@@ -8,6 +8,7 @@ public class MallapiApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(MallapiApplication.class, args);
+		System.out.println("+++++Start Mallapi+++++");
 	}
 
 }
