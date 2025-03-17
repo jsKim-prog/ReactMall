@@ -36,12 +36,14 @@ public class ProductController {
         productDTO.setUploadFileNames(uploadFileNames);
         // service로 dto 등록
         Long pno = productService.register(productDTO);
+
         //지연서비스
         try {
             Thread.sleep(2000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+
         return Map.of("result", pno);
     }
 
