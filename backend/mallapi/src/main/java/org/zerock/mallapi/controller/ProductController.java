@@ -52,7 +52,7 @@ public class ProductController {
     }
 
     //리스트 조회
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_ADMIN')")
     @GetMapping("/list")
     public PageResponseDTO<ProductDTO> list(PageRequestDTO pageRequestDTO){
         log.info("Product Controller-list 조회++++++++"+pageRequestDTO);
