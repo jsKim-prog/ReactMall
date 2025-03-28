@@ -3,7 +3,6 @@ import { lazy, Suspense } from "react";
 const Loading = <div>Loading....</div>
 const LoginPage  = lazy(()=> import("../pages/member/LoginPage"))
 const LogoutPage = lazy(() =>import("../pages/member/LogoutPage"))
-
 const KakaoRedirect = lazy(()=>import("../pages/member/KakaoRedirectPage"))
 const MemberModify = lazy(()=>import("../pages/member/ModifyPage"))
 

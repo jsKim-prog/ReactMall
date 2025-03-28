@@ -1,8 +1,10 @@
-import { useEffect, useState } from "react";
 import { API_SERVER_HOST } from "../../api/todoApi";
 import useCustomMove from "../../hooks/useCustomMove";
 import { getOne } from "../../api/productApi";
 import FetchingModal from "../common/FetchingModal";
+import useCustomCart from "../../hooks/useCustomCart";
+import useCustomLogin from "../../hooks/useCustomLogin";
+import { useQuery } from "@tanstack/react-query";
 
 const initState={
     pno:0,
@@ -13,24 +15,45 @@ const initState={
 }
 
 const host = API_SERVER_HOST
-
+// reactQuery 사용으로 재작성(ch.12)
 const ReadComponent = ({pno})=>{
-    const [product, setProduct] = useState(initState)
     const {moveToList, moveToModify} = useCustomMove()
-    //modal
-    const [fetching, setFetching] = useState(false)
+    //recoil
+    const {loginState} = useCustomLogin()
+    const {cartItems, changeCart} = useCustomCart()
+    // reactQuery - v.5
+    const queryKey = ['products', 'pno']
+    const queryFn = ()=>getOne(pno)
+    const options = {
+        stapleTime: 1000*10,
+        retry:1
+    }
 
-    useEffect(()=>{
-        setFetching(true)
-        getOne(pno).then(data=>{
-            setProduct(data)
-            setFetching(false)
-        })
-    },[pno])
+    const {isFetching, data} = useQuery({queryKey, queryFn, ...options})
+
+    const product = data || initState
+
+    //장바구니 추가 버튼 액션
+    const handleClickAddCart = () =>{
+        let qty = 1
+        const addedItem = cartItems.filter(item => item.pno === parseInt(pno))[0]
+
+        if(addedItem){
+            if(window.confirm("이미 추가된 상품입니다. 추가하시겠습니까?")===false){
+                return
+            }
+            qty = addedItem.qty +1
+        }
+
+        changeCart({email:loginState.email, pno:pno, qty:qty})
+        
+    }
+
+    
 
     return(
         <div className="border-2 border-sky-200 mt-10 m-2 p-4">
-        {fetching? <FetchingModal/>:<></>}
+        {isFetching? <FetchingModal/>:<></>}
             <div className="flex justify-center mt-2">
                 <div className="relative mb-4 flex w-full flex-wrap items-stretch">
                     <div className="w-1/5 p-6 text-right font-bold">PNO</div>
@@ -64,6 +87,7 @@ const ReadComponent = ({pno})=>{
                 src={`${host}/api/products/view/${imgFile}`}/>)}
             </div> 
             <div className="flex justify-end p-4">
+                <button type="button" className="inline-block rounded p-4 m-2 text-xl w-32 text-white bg-green-500" onClick={handleClickAddCart}>Add Cart</button>
                 <button type="button" className="inline-block rounded p-4 m-2 text-xl w-32 text-white bg-red-500" onClick={()=> moveToModify(pno)}>Modify</button>
                 <button type="button" className="inline-block rounded p-4 m-2 text-xl w-32 text-white bg-blue-500" onClick={moveToList}>List</button>
             </div>  
