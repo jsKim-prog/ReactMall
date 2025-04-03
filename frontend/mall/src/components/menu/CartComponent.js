@@ -1,27 +1,18 @@
 import useCustomLogin from "../../hooks/useCustomLogin"
-import { useEffect, useMemo } from "react";
 import useCustomCart from "../../hooks/useCustomCart";
 import CartItemComponent from "../cart/CartItemComponent";
+import { cartTotalState } from "../../atoms/cartState";
+import { useAtomValue } from "jotai";
 
+//Recoil, React-Query 적용
 const CartComponent = ()=>{
     //로그인 여부 확인
     const {isLogin, loginState} = useCustomLogin()
     //hook
-    const {refreshCart, cartItems, changeCart} = useCustomCart()
+    const {cartItems, changeCart} = useCustomCart()
     // 장바구니 총합
-    const total = useMemo(()=>{
-        let total =0
-        for(const item of cartItems) {
-            total += item.price * item.qty
-        }
-        return total
-    },[cartItems])
+    const totalValue = useAtomValue(cartTotalState)
 
-    useEffect(()=>{
-        if(isLogin){
-            refreshCart()
-        }
-    }, [isLogin])
 
     return(
         <div className="w-full">
@@ -40,7 +31,7 @@ const CartComponent = ()=>{
                         email={loginState.email}/>)}
                     </ul>
                 </div>
-                <div className="text-2xl text-right font-extrabold">TOTAL: {total}</div>
+                <div className="text-2xl text-right font-extrabold">TOTAL: {totalValue}</div>
             </div>
             :
             <></>}            

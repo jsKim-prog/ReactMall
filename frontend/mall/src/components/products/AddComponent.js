@@ -3,6 +3,7 @@ import { postAdd } from "../../api/productApi";
 import FetchingModal from "../common/FetchingModal";
 import ResultModal from "../common/ResultModal";
 import useCustomMove from "../../hooks/useCustomMove";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 const initState = {
     pname:'',   
@@ -10,14 +11,11 @@ const initState = {
     price:0,
     files:[]
 }
-
+//useMutation() 적용 수정
 const AddComponent = () =>{
     const [product, setProduct] = useState({...initState})
     //경로관리
     const uploadRef = useRef()
-    //modal
-    const [fetching, setFetching] = useState(false)
-    const [result, setResult] = useState(null)
     //완료 후 이동
     const {moveToList} = useCustomMove()
 
@@ -26,6 +24,10 @@ const AddComponent = () =>{
         product[e.target.name] = e.target.value
         setProduct({...product})
     }
+
+    //useMutation()
+    const mutationFn = (product)=> postAdd(product)
+    const addMutation = useMutation({mutationFn})
 
     //등록버튼 클릭 액션
     const handleClickAdd = (e) =>{
@@ -43,28 +45,26 @@ const AddComponent = () =>{
         formData.append("pdesc", product.pdesc)
         formData.append("price", product.price)
 
-        console.log("formdata:"+formData)
-        setFetching(true) //진행모달 열기
-        postAdd(formData).then(data=>{
-            setFetching(false) //진행모달 닫기
-            setResult(data.result) //결과모달 열기
-        })
+        addMutation.mutate(formData) //useMutation()
+        console.log("useMutation...")
     }
 
     //결과모달 닫기
+    // 모달창 닫을 때는 reactQuery 초기화
+    const queryClient = useQueryClient()
     const closeModal = ()=>{
-        setResult(null)
+        queryClient.invalidateQueries("products/list")
         moveToList({page:1})
     }
 
     return(
         <div className="border-2 border-sky-200 mt-10 m-2 p-4">
-            {fetching? <FetchingModal/>:<></>}
-            {result?
+            {addMutation.isLoading? <FetchingModal/>:<></>}
+            {addMutation.isSuccess?
             <ResultModal
             title={'Product Add Result'}
-            content={`${result}번 등록 완료`}
-            callbackFn={closeModal}/>:<></>}
+            content={`Add Success ${addMutation.data.result}`}
+            callbackFn={closeModal}/>:<></>} 
             <div className="flex justify-center">
                 <div className="relative mb-4 flex w-full flex-wrap items-stretch">
                     <div className="w-1/5 p-6 text-right font-bold">Product Name</div>
@@ -89,7 +89,7 @@ const AddComponent = () =>{
             </div>    
             <div className="flex justify-center">
                 <div className="relative mb-4 flex w-full flex-wrap items-stretch">
-                    <div className="w-1/5 p-6 text-right font-bold">Product Name</div>
+                    <div className="w-1/5 p-6 text-right font-bold">Price</div>
                     <input className="w-4/5 p-6 rounded-r border border-solid border-neutral-300 shadow-md"
                     name="price"
                     type={'number'}
