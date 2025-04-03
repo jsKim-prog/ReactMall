@@ -6,7 +6,7 @@ const host = API_SERVER_HOST
 const CartItemComponent = ({cino, qty, pno, pname, price, imageFile, changeCart, email})=>{
     //수량변경시 액션
     const handleClickQty = (amount) =>{
-        changeCart({email, cino, pno, qty:qty+amount})
+        changeCart({email:email, cino:cino, pno:pno, qty:qty+amount})
     }
     
     return(//CartComponent의 <ul>안에 들어갈 내용

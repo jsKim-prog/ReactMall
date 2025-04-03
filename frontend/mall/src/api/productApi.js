@@ -5,8 +5,10 @@ const host = `${API_SERVER_HOST}/api/products`
 
 //상품등록 : post /
 export const postAdd = async (product) =>{
+    console.log("post add start....")
     const header = {headers:{"Content-Type":"multipart/form-data"}}
     const res = await jwtAxios.post(`${host}/`, product, header)
+    console.log("post add end....")
     return res.data
 }
 
